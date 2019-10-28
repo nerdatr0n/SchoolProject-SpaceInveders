@@ -57,6 +57,8 @@ CPaddle::Process(float _fDeltaTick)
     
 	float fHalfPaddleW = static_cast<float>(m_pSprite->GetWidth() / 2.0);
 
+
+
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 	{
 		m_fX += 400.0f * _fDeltaTick;
@@ -74,5 +76,8 @@ CPaddle::Process(float _fDeltaTick)
 		m_fX = 385-fHalfPaddleW;
 	}
 	
+
+
+
 	CEntity::Process(_fDeltaTick);
 }

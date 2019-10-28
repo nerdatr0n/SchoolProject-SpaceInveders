@@ -8,7 +8,7 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
+// Author		: David Haverland
 // Mail			: your.name@mediadesign.school.nz
 //
 
@@ -56,14 +56,22 @@ CBall::Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _fVelocit
 void
 CBall::Draw()
 {
-    CEntity::Draw();
+	if (m_bCanHit)
+	{
+		CEntity::Draw();
+	}
 }
 
 void
 CBall::Process(float _fDeltaTick)
 {
-    m_fX += m_fVelocityX * _fDeltaTick;
-    m_fY += m_fVelocityY * _fDeltaTick;
+    // m_fX += m_fVelocityX * _fDeltaTick;
+    m_fY -= 100 * _fDeltaTick;
+
+	if (m_bCanHit == false)
+	{
+		
+	}
 
     CEntity::Process(_fDeltaTick);
 }
@@ -92,8 +100,24 @@ CBall::SetVelocityY(float _fY)
     m_fVelocityY = _fY;
 }
 
-float 
+
+bool
+CBall::GetCanHit() const
+{
+	return (m_bCanHit);
+}
+
+void 
+CBall::SetCanHit(bool _bCanHit)
+{
+	m_bCanHit = _bCanHit;
+}
+
+float
 CBall::GetRadius() const
 {
     return (GetWidth() / 2.0f);
 }
+
+
+

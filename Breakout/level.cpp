@@ -134,6 +134,7 @@ void
 CLevel::Draw()
 {
 	m_pBackground->Draw();
+
 	for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
     {
         m_vecBricks[i]->Draw();
@@ -152,13 +153,15 @@ CLevel::Process(float _fDeltaTick)
 	m_pBackground->Process(_fDeltaTick);
 	m_pBall->Process(_fDeltaTick);
 	m_pPaddle->Process(_fDeltaTick);
-	ProcessBallWallCollision(_fDeltaTick);
+
+	ProcessFire(_fDeltaTick);
+	//ProcessBallWallCollision(_fDeltaTick);
 	//ProcessPaddleWallCollison();
     ProcessBallPaddleCollision();
     ProcessBallBrickCollision();
 
     ProcessCheckForWin();
-	ProcessBallBounds();
+	//ProcessBallBounds();
 
     for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
     {
@@ -174,6 +177,17 @@ CPaddle*
 CLevel::GetPaddle() const
 {
     return (m_pPaddle);
+}
+
+void
+CLevel::ProcessFire(float _fDeltaTick)
+{
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000 and m_pBall->GetCanHit())
+	{
+		m_pBall->SetX(m_pPaddle->GetX());
+		m_pBall->SetY(m_pPaddle->GetY());
+		m_pBall->SetCanHit(true);
+	}
 }
 
 void 
@@ -260,7 +274,7 @@ CLevel::ProcessBallBrickCollision()
                 (fBallY + fBallR > fBrickY - fBrickH / 2) &&
                 (fBallY - fBallR < fBrickY + fBrickH / 2))
             {
-                //Hit the front side of the brick...
+                // Hit the front side of the brick...
                 m_pBall->SetY((fBrickY + fBrickH / 2.0f) + fBallR);
                 m_pBall->SetVelocityY(m_pBall->GetVelocityY() * -1);
                 m_vecBricks[i]->SetHit(true);
@@ -284,6 +298,8 @@ CLevel::ProcessCheckForWin()
 
     CGame::GetInstance().GameOverWon();
 }
+
+
 
 void
 CLevel::ProcessBallBounds()
