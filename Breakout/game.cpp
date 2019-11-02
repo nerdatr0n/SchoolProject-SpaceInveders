@@ -53,7 +53,7 @@ CGame::~CGame()
 }
 
 bool
-CGame::Initialise(HINSTANCE _hInstance, HWND _hWnd, int _iWidth, int _iHeight)
+CGame::Initialise(HINSTANCE _hInstance, HWND _hWnd, int _iWidth, int _iHeight) //	create clock, backbuffer and a level
 {
 	m_hApplicationInstance = _hInstance;
 	m_hMainWindow = _hWnd;

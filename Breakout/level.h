@@ -56,6 +56,8 @@ protected:
     void ProcessBallPaddleCollision();
     void ProcessBallBrickCollision();
 
+	void ProcessFire(float);
+
     void ProcessCheckForWin();
 
     void ProcessBallBounds();

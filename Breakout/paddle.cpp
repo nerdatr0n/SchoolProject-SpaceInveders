@@ -57,18 +57,6 @@ CPaddle::Process(float _fDeltaTick)
     
 	float fHalfPaddleW = static_cast<float>(m_pSprite->GetWidth() / 2.0);
 
-	static float s_fShootCooldown = 0;
-
-
-	if (s_fShootCooldown > 0) 
-	{
-		s_fShootCooldown -= _fDeltaTick;
-	}
-	else if (s_fShootCooldown != 0)
-	{
-		s_fShootCooldown = 0;
-	}
-
 
 
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
@@ -89,13 +77,7 @@ CPaddle::Process(float _fDeltaTick)
 	}
 	
 
-	// Does the shoot action
-	if ((GetAsyncKeyState(VK_SPACE) & 0x2001) and s_fShootCooldown == 0)
-	{
-		s_fShootCooldown = 100;
-	}
 
-	//if 
 
 	CEntity::Process(_fDeltaTick);
 }
