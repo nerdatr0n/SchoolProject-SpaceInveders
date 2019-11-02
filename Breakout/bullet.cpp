@@ -9,7 +9,7 @@
 // File Name	: 
 // Description	: 
 // Author		: David Haverland
-// Mail			: your.name@mediadesign.school.nz
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 // Library Includes
@@ -19,7 +19,7 @@
 #include "utils.h"
 
 // This Includes
-#include "Ball.h"
+#include "bullet.h"
 
 // Static Variables
 
@@ -27,20 +27,20 @@
 
 // Implementation
 
-CBall::CBall()
+CBullet::CBullet()
 : m_fVelocityX(0.0f)
 , m_fVelocityY(0.0f)
 {
 
 }
 
-CBall::~CBall()
+CBullet::~CBullet()
 {
 
 }
 
 bool
-CBall::Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _fVelocityY)
+CBullet::Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _fVelocityY)
 {
     VALIDATE(CEntity::Initialise(IDB_BALLSPRITE, IDB_BALLMASK));
     
@@ -54,7 +54,7 @@ CBall::Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _fVelocit
 }
 
 void
-CBall::Draw()
+CBullet::Draw()
 {
 	if (m_bCanHit)
 	{
@@ -63,11 +63,17 @@ CBall::Draw()
 }
 
 void
-CBall::Process(float _fDeltaTick)
+CBullet::Process(float _fDeltaTick)
 {
     // m_fX += m_fVelocityX * _fDeltaTick;
-    m_fY -= 100 * _fDeltaTick;
+    m_fY -= 300 * _fDeltaTick;
 
+
+	if (m_fY <= 0)
+	{
+		m_bCanHit = false;
+
+	}
 	if (m_bCanHit == false)
 	{
 		
@@ -77,44 +83,44 @@ CBall::Process(float _fDeltaTick)
 }
 
 float 
-CBall::GetVelocityX() const
+CBullet::GetVelocityX() const
 {
     return (m_fVelocityX);
 }
 
 float 
-CBall::GetVelocityY() const
+CBullet::GetVelocityY() const
 {
     return (m_fVelocityY);
 }
 
 void 
-CBall::SetVelocityX(float _fX)
+CBullet::SetVelocityX(float _fX)
 {
     m_fVelocityX = _fX;
 }
 
 void 
-CBall::SetVelocityY(float _fY)
+CBullet::SetVelocityY(float _fY)
 {
     m_fVelocityY = _fY;
 }
 
 
 bool
-CBall::GetCanHit() const
+CBullet::GetCanHit() const
 {
 	return (m_bCanHit);
 }
 
 void 
-CBall::SetCanHit(bool _bCanHit)
+CBullet::SetCanHit(bool _bCanHit)
 {
 	m_bCanHit = _bCanHit;
 }
 
 float
-CBall::GetRadius() const
+CBullet::GetRadius() const
 {
     return (GetWidth() / 2.0f);
 }

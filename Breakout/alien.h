@@ -4,56 +4,61 @@
 // Auckland
 // New Zealand
 //
-// (c) 2019 Media Design School
+// (c) 2019 Media Design School.
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 #pragma once
 
-#if !defined(__PADDLE_H__)
-#define __PADDLE_H__
+#if !defined(__BRICK_H__)
+#define __BRICK_H__
 
 // Library Includes
 
 // Local Includes
 #include "entity.h"
-#include "Sprite.h"
 
 // Types
 
 // Constants
 
 // Prototypes
-class CPaddle : public CEntity
+
+class CAlien : public CEntity
 {
     // Member Functions
 public:
-    CPaddle();
-    virtual ~CPaddle();
+    CAlien();
+    virtual ~CAlien();
 
     virtual bool Initialise();
 
     virtual void Draw();
     virtual void Process(float _fDeltaTick);
 
+    void SetHit(bool _b);
+    bool IsHit() const;
 
 protected:
 
 private:
-    CPaddle(const CPaddle& _kr);
-    CPaddle& operator= (const CPaddle& _kr);
+    CAlien(const CAlien& _kr);
+    CAlien& operator= (const CAlien& _kr);
 
     // Member Variables
 public:
 
 protected:
+    bool m_bHit;
 
 private:
 
 };
 
-#endif    // __PADDLE_H__
+
+#endif    // __BRICK_H__
+

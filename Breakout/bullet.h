@@ -4,12 +4,12 @@
 // Auckland
 // New Zealand
 //
-// (c) 2019 Media Design School
+// (c) 2019 Media Design School.
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 #pragma once
@@ -29,12 +29,12 @@
 // Prototypes
 class CSprite;
 
-class CBall : public CEntity
+class CBullet : public CEntity
 {
     // Member Functions
 public:
-    CBall();
-    virtual ~CBall();
+    CBullet();
+    virtual ~CBullet();
 
     virtual bool Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _fVelocityY);
 
@@ -54,8 +54,8 @@ public:
 protected:
 
 private:
-    CBall(const CBall& _kr);
-    CBall& operator= (const CBall& _kr);
+    CBullet(const CBullet& _kr);
+    CBullet& operator= (const CBullet& _kr);
 
     // Member Variables
 public:

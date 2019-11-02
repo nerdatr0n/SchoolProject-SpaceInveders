@@ -8,17 +8,17 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 // Library Includes
 
 // Local Includes
 #include "Game.h"
-#include "Paddle.h"
-#include "Brick.h"
-#include "Ball.h"
+#include "Player.h"
+#include "Alien.h"
+#include "bullet.h"
 #include "utils.h"
 #include "backbuffer.h"
 #include "framecounter.h"
@@ -36,32 +36,32 @@
 #define CHEAT_BOUNCE_ON_BACK_WALL
 
 CLevel::CLevel()
-: m_iBricksRemaining(0)
-, m_pPaddle(0)
-, m_pBall(0)
+: m_iAliensRemaining(0)
+, m_pPlayer(0)
+, m_pBullet(0)
 , m_iWidth(0)
 , m_iHeight(0)
 , m_fpsCounter(0)
 {
-
+//bullet
 }
 
 CLevel::~CLevel()
 {
-    while (m_vecBricks.size() > 0)
+    while (m_vecAliens.size() > 0)
     {
-        CBrick* pBrick = m_vecBricks[m_vecBricks.size() - 1];
+        CAlien* pAlien = m_vecAliens[m_vecAliens.size() - 1];
 
-        m_vecBricks.pop_back();
+        m_vecAliens.pop_back();
 
-        delete pBrick;
+        delete pAlien;
     }
 
-    delete m_pPaddle;
-    m_pPaddle = 0;
+    delete m_pPlayer;
+    m_pPlayer = 0;
 
-    delete m_pBall;
-    m_pBall = 0;
+    delete m_pBullet;
+	m_pBullet = 0;
 
 	delete m_fpsCounter;
 	m_fpsCounter = 0;
@@ -77,8 +77,8 @@ CLevel::Initialise(int _iWidth, int _iHeight)
     m_iWidth = _iWidth;
     m_iHeight = _iHeight;
 
-    const float fBallVelX = 200.0f;
-    const float fBallVelY = 75.0f;
+    const float fBulletVelX = 200.0f;
+    const float fBulletVelY = 75.0f;
 
 	m_pBackground = new CBackGround();
 	VALIDATE(m_pBackground->Initialise());
@@ -86,33 +86,33 @@ CLevel::Initialise(int _iWidth, int _iHeight)
 	m_pBackground->SetX((float)m_iWidth / 2);
 	m_pBackground->SetY((float)m_iHeight / 2);
 
-	m_pBall = new CBall();
-    VALIDATE(m_pBall->Initialise(m_iWidth / 2.0f, m_iHeight / 2.0f, fBallVelX, fBallVelY));
+	m_pBullet = new CBullet();
+    VALIDATE(m_pBullet->Initialise(m_iWidth / 2.0f, -10, fBulletVelX, fBulletVelY));
 
-    m_pPaddle = new CPaddle();
-    VALIDATE(m_pPaddle->Initialise());
+    m_pPlayer = new CPlayer();
+    VALIDATE(m_pPlayer->Initialise());
 
-    // Set the paddle's position to be centered on the x, 
+    // Set the player's position to be centered on the x, 
     // and a little bit up from the bottom of the window.
-    m_pPaddle->SetX(_iWidth / 2.0f);
-    m_pPaddle->SetY(_iHeight - ( 1.5f * m_pPaddle->GetHeight()));
+    m_pPlayer->SetX(_iWidth / 2.0f);
+    m_pPlayer->SetY(_iHeight - ( 1.5f * m_pPlayer->GetHeight()));
 
-    const int kiNumBricks = 36;
+    const int kiNumAliens = 36;
     const int kiStartX = 20;
     const int kiGap = 5;
 
     int iCurrentX = kiStartX;
     int iCurrentY = kiStartX;
 
-    for (int i = 0; i < kiNumBricks; ++i)
+    for (int i = 0; i < kiNumAliens; ++i)
     {
-        CBrick* pBrick = new CBrick();
-        VALIDATE(pBrick->Initialise());
+        CAlien* pAlien = new CAlien();
+        VALIDATE(pAlien->Initialise());
 
-        pBrick->SetX(static_cast<float>(iCurrentX));
-        pBrick->SetY(static_cast<float>(iCurrentY));
+        pAlien->SetX(static_cast<float>(iCurrentX));
+        pAlien->SetY(static_cast<float>(iCurrentY));
 
-        iCurrentX += static_cast<int>(pBrick->GetWidth()) + kiGap;
+        iCurrentX += static_cast<int>(pAlien->GetWidth()) + kiGap;
 
         if (iCurrentX > _iWidth)
         {
@@ -120,10 +120,10 @@ CLevel::Initialise(int _iWidth, int _iHeight)
             iCurrentY += 20;
         }
 
-        m_vecBricks.push_back(pBrick);
+        m_vecAliens.push_back(pAlien);
     }
 
-    SetBricksRemaining(kiNumBricks);
+    SetAliensRemaining(kiNumAliens);
 	m_fpsCounter = new CFPSCounter();
 	VALIDATE(m_fpsCounter->Initialise());
 
@@ -135,13 +135,13 @@ CLevel::Draw()
 {
 	m_pBackground->Draw();
 
-	for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
+	for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
     {
-        m_vecBricks[i]->Draw();
+        m_vecAliens[i]->Draw();
     }
 
-    m_pPaddle->Draw();
-    m_pBall->Draw();
+    m_pPlayer->Draw();
+    m_pBullet->Draw();
 
     DrawScore();
 	DrawFPS();
@@ -151,21 +151,26 @@ void
 CLevel::Process(float _fDeltaTick)
 {
 	m_pBackground->Process(_fDeltaTick);
-	m_pBall->Process(_fDeltaTick);
-	m_pPaddle->Process(_fDeltaTick);
+	m_pBullet->Process(_fDeltaTick);
+	m_pPlayer->Process(_fDeltaTick);
 
 	ProcessFire(_fDeltaTick);
-	//ProcessBallWallCollision(_fDeltaTick);
-	//ProcessPaddleWallCollison();
-    ProcessBallPaddleCollision();
-    ProcessBallBrickCollision();
+	//ProcessBulletWallCollision(_fDeltaTick);
+	//ProcessPlayerWallCollison();
+    //ProcessBulletPlayerCollision();
+    
+	if (m_pBullet->GetCanHit() == true)
+	{
+		ProcessBulletAlienCollision();
+	}
+	
 
     ProcessCheckForWin();
-	//ProcessBallBounds();
+	//ProcessBulletBounds();
 
-    for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
+    for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
     {
-        m_vecBricks[i]->Process(_fDeltaTick);
+        m_vecAliens[i]->Process(_fDeltaTick);
     }
 	
    
@@ -173,53 +178,53 @@ CLevel::Process(float _fDeltaTick)
 	m_fpsCounter->CountFramesPerSecond(_fDeltaTick);
 }
 
-CPaddle* 
-CLevel::GetPaddle() const
+CPlayer* 
+CLevel::GetPlayer() const
 {
-    return (m_pPaddle);
+    return (m_pPlayer);
 }
 
 void
 CLevel::ProcessFire(float _fDeltaTick)
 {
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000 and m_pBall->GetCanHit())
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000 and !m_pBullet->GetCanHit())
 	{
-		m_pBall->SetX(m_pPaddle->GetX());
-		m_pBall->SetY(m_pPaddle->GetY());
-		m_pBall->SetCanHit(true);
+		m_pBullet->SetX(m_pPlayer->GetX());
+		m_pBullet->SetY(m_pPlayer->GetY());
+		m_pBullet->SetCanHit(true);
 	}
 }
 
 void 
-CLevel::ProcessBallWallCollision(float _fDeltaTick)
+CLevel::ProcessBulletWallCollision(float _fDeltaTick)
 {
-    float fBallX = m_pBall->GetX();
-    float fBallY = m_pBall->GetY();
-    float fBallW = m_pBall->GetWidth();
-    float fBallH = m_pBall->GetHeight();
+    float fBulletX = m_pBullet->GetX();
+    float fBulletY = m_pBullet->GetY();
+    float fBulletW = m_pBullet->GetWidth();
+    float fBulletH = m_pBullet->GetHeight();
 
-    float fHalfBallW = fBallW / 2;
-	float fHalfBallH = fBallH / 2;
+    float fHalfBulletW = fBulletW / 2;
+	float fHalfBulletH = fBulletH / 2;
 
-    if (fBallX <= fHalfBallW) //represents the situation when the ball has hit the left wall
+    if (fBulletX <= fHalfBulletW) //represents the situation when the bullet has hit the left wall
     {
-        m_pBall->SetVelocityX(m_pBall->GetVelocityX() * -1); //reverse the ball's x velocity
+        m_pBullet->SetVelocityX(m_pBullet->GetVelocityX() * -1); //reverse the bullet's x velocity
     }
-    else if (fBallX >= m_iWidth - fHalfBallW) //represents the situation when the ball has hit the right wall
+    else if (fBulletX >= m_iWidth - fHalfBulletW) //represents the situation when the bullet has hit the right wall
     {
-        m_pBall->SetVelocityX(m_pBall->GetVelocityX() * -1); //reverse the ball's x velocity direction
-		//m_pBall->SetX(m_pBall->GetX() + m_pBall->GetVelocityX() * _fDeltaTick);
+        m_pBullet->SetVelocityX(m_pBullet->GetVelocityX() * -1); //reverse the bullet's x velocity direction
+		//m_pBullet->SetX(m_pBullet->GetX() + m_pBullet->GetVelocityX() * _fDeltaTick);
 	}
 
-	if (fBallY < fHalfBallH) //represents the situation when the ball has hit the top wall
+	if (fBulletY < fHalfBulletH) //represents the situation when the bullet has hit the top wall
     {
-        m_pBall->SetVelocityY(m_pBall->GetVelocityY() * -1); //reverse the ball's y velocity
+        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //reverse the bullet's y velocity
     }
 
 #ifdef CHEAT_BOUNCE_ON_BACK_WALL
-	if (fBallY  > m_iHeight - fHalfBallH)  //represents the situation when the ball has hit the bottom wall
+	if (fBulletY  > m_iHeight - fHalfBulletH)  //represents the situation when the bullet has hit the bottom wall
     {
-        m_pBall->SetVelocityY(m_pBall->GetVelocityY() * -1); //reverse the ball's y velocity
+        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //reverse the bullet's y velocity
     }
 #endif //CHEAT_BOUNCE_ON_BACK_WALL
 }
@@ -228,58 +233,60 @@ CLevel::ProcessBallWallCollision(float _fDeltaTick)
 
 
 void
-CLevel::ProcessBallPaddleCollision()
+CLevel::ProcessBulletPlayerCollision()
 {
-    float fBallR = m_pBall->GetRadius();
+    float fBulletR = m_pBullet->GetRadius();
 
-    float fBallX = m_pBall->GetX();
-    float fBallY = m_pBall->GetY(); 
+    float fBulletX = m_pBullet->GetX();
+    float fBulletY = m_pBullet->GetY(); 
 
-    float fPaddleX = m_pPaddle->GetX();
-    float fPaddleY = m_pPaddle->GetY();
+    float fPlayerX = m_pPlayer->GetX();
+    float fPlayerY = m_pPlayer->GetY();
 
-    float fPaddleH = m_pPaddle->GetHeight();
-    float fPaddleW = m_pPaddle->GetWidth();
+    float fPlayerH = m_pPlayer->GetHeight();
+    float fPlayerW = m_pPlayer->GetWidth();
 
-    if ((fBallX + fBallR > fPaddleX - fPaddleW / 2) && //ball.right > paddle.left
-        (fBallX - fBallR < fPaddleX + fPaddleW / 2) && //ball.left < paddle.right
-        (fBallY + fBallR > fPaddleY - fPaddleH / 2) && //ball.bottom > paddle.top
-        (fBallY - fBallR < fPaddleY + fPaddleH / 2))  //ball.top < paddle.bottom
+    if ((fBulletX + fBulletR > fPlayerX - fPlayerW / 2) && //bullet.right > player.left
+        (fBulletX - fBulletR < fPlayerX + fPlayerW / 2) && //bullet.left < player.right
+        (fBulletY + fBulletR > fPlayerY - fPlayerH / 2) && //bullet.bottom > player.top
+        (fBulletY - fBulletR < fPlayerY + fPlayerH / 2))  //bullet.top < player.bottom
     {
-        m_pBall->SetY((fPaddleY - fPaddleH / 2) - fBallR);  //Set the ball.bottom = paddle.top; to prevent the ball from going through the paddle!
-        m_pBall->SetVelocityY(m_pBall->GetVelocityY() * -1); //Reverse ball's Y direction
+        m_pBullet->SetY((fPlayerY - fPlayerH / 2) - fBulletR);  //Set the bullet.bottom = player.top; to prevent the bullet from going through the player!
+        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //Reverse bullet's Y direction
     }
 }
 
 void
-CLevel::ProcessBallBrickCollision()
+CLevel::ProcessBulletAlienCollision()
 {
-    for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
+    for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
     {
-        if (!m_vecBricks[i]->IsHit())
+        if (!m_vecAliens[i]->IsHit())
         {
-            float fBallR = m_pBall->GetRadius();
+            float fBulletR = m_pBullet->GetRadius();
 
-            float fBallX = m_pBall->GetX();
-            float fBallY = m_pBall->GetY(); 
+            float fBulletX = m_pBullet->GetX();
+            float fBulletY = m_pBullet->GetY(); 
 
-            float fBrickX = m_vecBricks[i]->GetX();
-            float fBrickY = m_vecBricks[i]->GetY();
+            float fAlienX = m_vecAliens[i]->GetX();
+            float fAlienY = m_vecAliens[i]->GetY();
 
-            float fBrickH = m_vecBricks[i]->GetHeight();
-            float fBrickW = m_vecBricks[i]->GetWidth();
+            float fAlienH = m_vecAliens[i]->GetHeight();
+            float fAlienW = m_vecAliens[i]->GetWidth();
 
-            if ((fBallX + fBallR > fBrickX - fBrickW / 2) &&
-                (fBallX - fBallR < fBrickX + fBrickW / 2) &&
-                (fBallY + fBallR > fBrickY - fBrickH / 2) &&
-                (fBallY - fBallR < fBrickY + fBrickH / 2))
+            if ((fBulletX + fBulletR > fAlienX - fAlienW / 2) &&
+                (fBulletX - fBulletR < fAlienX + fAlienW / 2) &&
+                (fBulletY + fBulletR > fAlienY - fAlienH / 2) &&
+                (fBulletY - fBulletR < fAlienY + fAlienH / 2))
             {
-                // Hit the front side of the brick...
-                m_pBall->SetY((fBrickY + fBrickH / 2.0f) + fBallR);
-                m_pBall->SetVelocityY(m_pBall->GetVelocityY() * -1);
-                m_vecBricks[i]->SetHit(true);
+                // Hit the front side of the alien...
+                m_pBullet->SetY((fAlienY + fAlienH / 2.0f) + fBulletR);
+                m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1);
+                m_vecAliens[i]->SetHit(true);
 
-                SetBricksRemaining(GetBricksRemaining() - 1);
+				m_pBullet->SetCanHit(false);
+
+                SetAliensRemaining(GetAliensRemaining() - 1);
             }
         }
     }
@@ -288,9 +295,9 @@ CLevel::ProcessBallBrickCollision()
 void
 CLevel::ProcessCheckForWin()
 {
-    for (unsigned int i = 0; i < m_vecBricks.size(); ++i)
+    for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
     {
-        if (!m_vecBricks[i]->IsHit())
+        if (!m_vecAliens[i]->IsHit())
         {
             return;
         }
@@ -302,38 +309,38 @@ CLevel::ProcessCheckForWin()
 
 
 void
-CLevel::ProcessBallBounds()
+CLevel::ProcessBulletBounds()
 {
-	if (m_pBall->GetX() < 0)
+	if (m_pBullet->GetX() < 0)
     {
-        m_pBall->SetX(0);
+        m_pBullet->SetX(0);
     }
-	else if (m_pBall->GetX() > m_iWidth)
+	else if (m_pBullet->GetX() > m_iWidth)
     {
-        m_pBall->SetX(static_cast<float>(m_iWidth));
+        m_pBullet->SetX(static_cast<float>(m_iWidth));
     }
 
-    if (m_pBall->GetY() < 0)
+    if (m_pBullet->GetY() < 0)
     {
-        m_pBall->SetY(0.0f);
+        m_pBullet->SetY(0.0f);
     }
-    else if (m_pBall->GetY() > m_iHeight)
+    else if (m_pBullet->GetY() > m_iHeight)
     {
         CGame::GetInstance().GameOverLost();
-        //m_pBall->SetY(static_cast<float>(m_iHeight));
+        //m_pBullet->SetY(static_cast<float>(m_iHeight));
     }
 }
 
 int 
-CLevel::GetBricksRemaining() const
+CLevel::GetAliensRemaining() const
 {
-    return (m_iBricksRemaining);
+    return (m_iAliensRemaining);
 }
 
 void 
-CLevel::SetBricksRemaining(int _i)
+CLevel::SetAliensRemaining(int _i)
 {
-    m_iBricksRemaining = _i;
+    m_iAliensRemaining = _i;
     UpdateScoreText();
 }
 
@@ -354,9 +361,9 @@ CLevel::DrawScore()
 void 
 CLevel::UpdateScoreText()
 {
-    m_strScore = "Bricks Remaining: ";
+    m_strScore = "Aliens Remaining: ";
 
-    m_strScore += ToString(GetBricksRemaining());
+    m_strScore += ToString(GetAliensRemaining());
 }
 
 

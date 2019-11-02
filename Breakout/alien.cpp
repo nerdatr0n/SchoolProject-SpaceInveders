@@ -8,8 +8,8 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 // Library Includes
@@ -19,7 +19,7 @@
 #include "utils.h"
 
 // This Include
-#include "Brick.h"
+#include "Alien.h"
 
 // Static Variables
 
@@ -27,19 +27,19 @@
 
 // Implementation
 
-CBrick::CBrick()
+CAlien::CAlien()
 : m_bHit(false)
 {
 
 }
 
-CBrick::~CBrick()
+CAlien::~CAlien()
 {
 
 }
 
 bool
-CBrick::Initialise()
+CAlien::Initialise()
 {
     VALIDATE(CEntity::Initialise(IDB_BRICKSPRITE, IDB_BRICKMASK));
 
@@ -47,7 +47,7 @@ CBrick::Initialise()
 }
 
 void
-CBrick::Draw()
+CAlien::Draw()
 {
     if (!m_bHit)
     {
@@ -56,7 +56,7 @@ CBrick::Draw()
 }
 
 void
-CBrick::Process(float _fDeltaTick)
+CAlien::Process(float _fDeltaTick)
 {
     if (!m_bHit)
     {
@@ -65,13 +65,13 @@ CBrick::Process(float _fDeltaTick)
 }
 
 void
-CBrick::SetHit(bool _b)
+CAlien::SetHit(bool _b)
 {
     m_bHit = _b;
 }
 
 bool
-CBrick::IsHit() const
+CAlien::IsHit() const
 {
     return (m_bHit);
 }

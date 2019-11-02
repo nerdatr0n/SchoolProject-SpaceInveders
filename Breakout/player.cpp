@@ -8,8 +8,8 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 // Library Includes
@@ -19,7 +19,7 @@
 #include "utils.h"
 
 // This Include
-#include "Paddle.h"
+#include "Player.h"
 
 // Static Variables
 
@@ -27,18 +27,18 @@
 
 // Implementation
 
-CPaddle::CPaddle()
+CPlayer::CPlayer()
 {
 
 }
 
-CPaddle::~CPaddle()
+CPlayer::~CPlayer()
 {
 
 }
 
 bool
-CPaddle::Initialise()
+CPlayer::Initialise()
 {
     VALIDATE(CEntity::Initialise(IDB_PADDLESPRITE, IDB_PADDLEMASK));
 
@@ -46,16 +46,16 @@ CPaddle::Initialise()
 }
 
 void
-CPaddle::Draw()
+CPlayer::Draw()
 {
     CEntity::Draw();
 }
 
 void
-CPaddle::Process(float _fDeltaTick)
+CPlayer::Process(float _fDeltaTick)
 {
     
-	float fHalfPaddleW = static_cast<float>(m_pSprite->GetWidth() / 2.0);
+	float fHalfPlayerW = static_cast<float>(m_pSprite->GetWidth() / 2.0);
 
 
 
@@ -67,13 +67,13 @@ CPaddle::Process(float _fDeltaTick)
 	{ 
 		m_fX -= 400.0f * _fDeltaTick;
 	}
-	if (m_fX - fHalfPaddleW <= 0)
+	if (m_fX - fHalfPlayerW <= 0)
 	{
-		m_fX = fHalfPaddleW;
+		m_fX = fHalfPlayerW;
 	}
-	else if (m_fX + fHalfPaddleW >= 385)
+	else if (m_fX + fHalfPlayerW >= 385)
 	{
-		m_fX = 385-fHalfPaddleW;
+		m_fX = 385-fHalfPlayerW;
 	}
 	
 

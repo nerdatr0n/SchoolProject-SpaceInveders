@@ -4,12 +4,12 @@
 // Auckland
 // New Zealand
 //
-// (c) 2019 Media Design School
+// (c) 2019 Media Design School.
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: David Haverland
+// Mail			: david.hav8466@mediadesign.school.nz
 //
 
 

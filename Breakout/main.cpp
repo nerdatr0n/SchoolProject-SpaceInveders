@@ -21,7 +21,7 @@
 #include "Clock.h"
 #include "utils.h"
 #include "level.h"
-#include "paddle.h"
+#include "player.h"
 
 const int kiWidth = 400;
 const int kiHeight = 400;
@@ -37,7 +37,7 @@ WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam, LPARAM _lParam)
 	case WM_MOUSEMOVE:
 	{
 		int iMouseX = LOWORD(_lParam);
-		//CGame::GetInstance().GetLevel()->GetPaddle()->SetX(static_cast<float>(iMouseX));
+		//CGame::GetInstance().GetLevel()->GetPlayer()->SetX(static_cast<float>(iMouseX));
 		return (0);
 	}
 		break;
@@ -108,7 +108,7 @@ WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdline, int _i
 	ZeroMemory(&msg, sizeof(MSG));
 
 
-	HWND hwnd = CreateAndRegisterWindow(_hInstance, kiWidth, kiHeight, L"Breakout");
+	HWND hwnd = CreateAndRegisterWindow(_hInstance, kiWidth, kiHeight, L"SpaceInvaders");
 
 	CGame& rGame = CGame::GetInstance();
 	
