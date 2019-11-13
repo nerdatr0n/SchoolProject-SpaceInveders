@@ -51,6 +51,9 @@
     <ClCompile Include="alien.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="alienBullet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="backbuffer.h">
@@ -92,10 +95,45 @@
     <ClInclude Include="alien.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="alienBullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SpaceInvaders.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Sprites\AlienBulletMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\BulletMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\BulletSprite.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\AlienMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\AlienSprite.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\PlayerMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\PlayerSprite.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\Background.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\BackgroundMask.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Sprites\AlienBulletSprite.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

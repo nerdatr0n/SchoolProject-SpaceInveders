@@ -33,6 +33,7 @@ class CPlayer;
 class CAlien;
 class CFPSCounter;
 class CBackGround;
+class CAlienBullet;
 
 class CLevel
 {
@@ -55,6 +56,9 @@ protected:
 	void ProcessPlayerWallCollison();
     void ProcessBulletPlayerCollision();
     void ProcessBulletAlienCollision();
+	void ProcessMoveAliens(float _fDeltaTick);
+	void ProcessAlienFire(float _fDeltaTick);
+
 
 	void ProcessFire(float);
 
@@ -78,7 +82,9 @@ public:
 protected:
 	CBackGround* m_pBackground;
     CBullet* m_pBullet;
+	CAlienBullet* m_pAlienBullet;
     CPlayer* m_pPlayer;
+	
     std::vector<CAlien*> m_vecAliens;
 	CFPSCounter* m_fpsCounter;
 

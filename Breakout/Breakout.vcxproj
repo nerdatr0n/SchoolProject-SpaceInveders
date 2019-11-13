@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="alienBullet.cpp" />
     <ClCompile Include="backbuffer.cpp" />
     <ClCompile Include="background.cpp" />
     <ClCompile Include="bullet.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="sprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alienBullet.h" />
     <ClInclude Include="backbuffer.h" />
     <ClInclude Include="background.h" />
     <ClInclude Include="bullet.h" />
@@ -170,6 +172,18 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SpaceInvaders.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Sprites\AlienBulletMask.bmp" />
+    <Image Include="Sprites\AlienBulletSprite.bmp" />
+    <Image Include="Sprites\AlienMask.bmp" />
+    <Image Include="Sprites\AlienSprite.bmp" />
+    <Image Include="Sprites\Background.bmp" />
+    <Image Include="Sprites\BackgroundMask.bmp" />
+    <Image Include="Sprites\BulletMask.bmp" />
+    <Image Include="Sprites\BulletSprite.bmp" />
+    <Image Include="Sprites\PlayerMask.bmp" />
+    <Image Include="Sprites\PlayerSprite.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

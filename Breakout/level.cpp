@@ -23,6 +23,7 @@
 #include "backbuffer.h"
 #include "framecounter.h"
 #include "background.h"
+#include "alienBullet.h"
 
 // This Include
 #include "Level.h"
@@ -89,6 +90,13 @@ CLevel::Initialise(int _iWidth, int _iHeight)
 	m_pBullet = new CBullet();
     VALIDATE(m_pBullet->Initialise(m_iWidth / 2.0f, -10, fBulletVelX, fBulletVelY));
 
+
+
+	m_pAlienBullet = new CAlienBullet();
+	VALIDATE(m_pAlienBullet->Initialise(m_iWidth / 2.0f, -10, fBulletVelX, fBulletVelY));
+
+
+
     m_pPlayer = new CPlayer();
     VALIDATE(m_pPlayer->Initialise());
 
@@ -97,7 +105,7 @@ CLevel::Initialise(int _iWidth, int _iHeight)
     m_pPlayer->SetX(_iWidth / 2.0f);
     m_pPlayer->SetY(_iHeight - ( 1.5f * m_pPlayer->GetHeight()));
 
-    const int kiNumAliens = 36;
+    const int kiNumAliens = 30;
     const int kiStartX = 20;
     const int kiGap = 5;
 
@@ -114,7 +122,7 @@ CLevel::Initialise(int _iWidth, int _iHeight)
 
         iCurrentX += static_cast<int>(pAlien->GetWidth()) + kiGap;
 
-        if (iCurrentX > _iWidth)
+        if (iCurrentX > _iWidth - 100)
         {
             iCurrentX = kiStartX;
             iCurrentY += 20;
@@ -142,6 +150,7 @@ CLevel::Draw()
 
     m_pPlayer->Draw();
     m_pBullet->Draw();
+	m_pAlienBullet->Draw();
 
     DrawScore();
 	DrawFPS();
@@ -152,8 +161,10 @@ CLevel::Process(float _fDeltaTick)
 {
 	m_pBackground->Process(_fDeltaTick);
 	m_pBullet->Process(_fDeltaTick);
+	m_pAlienBullet->Process(_fDeltaTick);
 	m_pPlayer->Process(_fDeltaTick);
 
+	ProcessAlienFire(_fDeltaTick);
 	ProcessFire(_fDeltaTick);
 	//ProcessBulletWallCollision(_fDeltaTick);
 	//ProcessPlayerWallCollison();
@@ -173,7 +184,7 @@ CLevel::Process(float _fDeltaTick)
         m_vecAliens[i]->Process(_fDeltaTick);
     }
 	
-   
+	ProcessMoveAliens(_fDeltaTick);
     
 	m_fpsCounter->CountFramesPerSecond(_fDeltaTick);
 }
@@ -230,6 +241,48 @@ CLevel::ProcessBulletWallCollision(float _fDeltaTick)
 }
 
 
+void
+CLevel::ProcessAlienFire(float _fDeltaTick)
+{
+	
+	if (!m_pAlienBullet->GetCanHit())
+	{
+		//Brick Movement Code
+		bool bMoveDown = true;
+		static float fMoveXVel = 0.1f;
+		//static float fAlienHeight = 20;
+
+		int iAlienNumber = rand() % m_vecAliens.size();
+
+		CAlien* pAlien = m_vecAliens[iAlienNumber];
+
+		float fAlienHighestY = pAlien->GetY();
+		float fAlienX = pAlien->GetX();
+
+		for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
+		{
+			CAlien* pTempAlien = m_vecAliens[i];
+
+			if (pTempAlien->GetX() == fAlienX)
+			{
+				if (pTempAlien->GetY() > fAlienHighestY)
+				{
+					pAlien = m_vecAliens[i];
+					fAlienHighestY = pAlien->GetY();
+				}
+
+			}
+		}
+
+
+		m_pAlienBullet->SetX(pAlien->GetX() + 10);
+		m_pAlienBullet->SetY(pAlien->GetY());
+		m_pAlienBullet->SetCanHit(true);
+	}
+
+	
+	
+}
 
 
 void
@@ -290,6 +343,38 @@ CLevel::ProcessBulletAlienCollision()
             }
         }
     }
+}
+
+void CLevel::ProcessMoveAliens(float _fDeltaTick)
+{
+	//Brick Movement Code
+	bool bMoveDown = true;
+	static float fMoveXVel = 0.1f;
+	//static float fAlienHeight = 20;
+	for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
+	{
+		m_vecAliens[i]->SetX(m_vecAliens[i]->GetX() + fMoveXVel);
+		//Move right
+		if ((m_vecAliens[i]->GetX() + m_vecAliens[i]->GetWidth() <= 60) && !(m_vecAliens[i]->IsHit()))
+		{
+			fMoveXVel *= -1.0f;
+			//Move down if at end of width of screen
+			for (int j = 0; j < m_vecAliens.size(); j++)
+			{
+				m_vecAliens[j]->SetY(m_vecAliens[j]->GetY() + 20);
+			}
+		}
+		//Move left
+		if ((m_vecAliens[i]->GetX() + m_vecAliens[i]->GetWidth() >= m_iWidth) && !(m_vecAliens[i]->IsHit()))
+		{
+			fMoveXVel *= -1.0f;
+			//Move down if at end of width of screen
+			for (int j = 0; j < m_vecAliens.size(); j++)
+			{
+				m_vecAliens[j]->SetY(m_vecAliens[j]->GetY() + 20);
+			}
+		}
+	}
 }
 
 void
