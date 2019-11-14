@@ -13,6 +13,7 @@
 //
 
 // Library Includes
+#include <time.h>
 
 // Local Includes
 #include "Game.h"
@@ -24,6 +25,7 @@
 #include "framecounter.h"
 #include "background.h"
 #include "alienBullet.h"
+#include "mysteryship.h"
 
 // This Include
 #include "Level.h"
@@ -61,6 +63,12 @@ CLevel::~CLevel()
     delete m_pPlayer;
     m_pPlayer = 0;
 
+	delete m_pMysteryShip;
+	m_pMysteryShip = 0;
+
+	delete m_pAlienBullet;
+	m_pAlienBullet = 0;
+
     delete m_pBullet;
 	m_pBullet = 0;
 
@@ -95,6 +103,8 @@ CLevel::Initialise(int _iWidth, int _iHeight)
 	m_pAlienBullet = new CAlienBullet();
 	VALIDATE(m_pAlienBullet->Initialise(m_iWidth / 2.0f, -10, fBulletVelX, fBulletVelY));
 
+	m_pMysteryShip = new CMysteryShip();
+	VALIDATE(m_pMysteryShip->Initialise());
 
 
     m_pPlayer = new CPlayer();
@@ -109,8 +119,11 @@ CLevel::Initialise(int _iWidth, int _iHeight)
     const int kiStartX = 20;
     const int kiGap = 5;
 
+	m_iLives = 3;
+	m_iScore = 0;
+
     int iCurrentX = kiStartX;
-    int iCurrentY = kiStartX;
+    int iCurrentY = 40;
 
     for (int i = 0; i < kiNumAliens; ++i)
     {
@@ -151,9 +164,11 @@ CLevel::Draw()
     m_pPlayer->Draw();
     m_pBullet->Draw();
 	m_pAlienBullet->Draw();
+	m_pMysteryShip->Draw();
 
     DrawScore();
 	DrawFPS();
+	DrawHealth();
 }
 
 void
@@ -163,20 +178,24 @@ CLevel::Process(float _fDeltaTick)
 	m_pBullet->Process(_fDeltaTick);
 	m_pAlienBullet->Process(_fDeltaTick);
 	m_pPlayer->Process(_fDeltaTick);
+	m_pMysteryShip->Process(_fDeltaTick);
 
 	ProcessAlienFire(_fDeltaTick);
 	ProcessFire(_fDeltaTick);
-	//ProcessBulletWallCollision(_fDeltaTick);
-	//ProcessPlayerWallCollison();
-    //ProcessBulletPlayerCollision();
-    
+    ProcessBulletPlayerCollision();
+	ProcessBulletMysteryShipCollision();
+
+
 	if (m_pBullet->GetCanHit() == true)
 	{
 		ProcessBulletAlienCollision();
 	}
 	
+	
+
 
     ProcessCheckForWin();
+	ProcessCheckForLose();
 	//ProcessBulletBounds();
 
     for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
@@ -206,39 +225,6 @@ CLevel::ProcessFire(float _fDeltaTick)
 	}
 }
 
-void 
-CLevel::ProcessBulletWallCollision(float _fDeltaTick)
-{
-    float fBulletX = m_pBullet->GetX();
-    float fBulletY = m_pBullet->GetY();
-    float fBulletW = m_pBullet->GetWidth();
-    float fBulletH = m_pBullet->GetHeight();
-
-    float fHalfBulletW = fBulletW / 2;
-	float fHalfBulletH = fBulletH / 2;
-
-    if (fBulletX <= fHalfBulletW) //represents the situation when the bullet has hit the left wall
-    {
-        m_pBullet->SetVelocityX(m_pBullet->GetVelocityX() * -1); //reverse the bullet's x velocity
-    }
-    else if (fBulletX >= m_iWidth - fHalfBulletW) //represents the situation when the bullet has hit the right wall
-    {
-        m_pBullet->SetVelocityX(m_pBullet->GetVelocityX() * -1); //reverse the bullet's x velocity direction
-		//m_pBullet->SetX(m_pBullet->GetX() + m_pBullet->GetVelocityX() * _fDeltaTick);
-	}
-
-	if (fBulletY < fHalfBulletH) //represents the situation when the bullet has hit the top wall
-    {
-        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //reverse the bullet's y velocity
-    }
-
-#ifdef CHEAT_BOUNCE_ON_BACK_WALL
-	if (fBulletY  > m_iHeight - fHalfBulletH)  //represents the situation when the bullet has hit the bottom wall
-    {
-        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //reverse the bullet's y velocity
-    }
-#endif //CHEAT_BOUNCE_ON_BACK_WALL
-}
 
 
 void
@@ -251,9 +237,18 @@ CLevel::ProcessAlienFire(float _fDeltaTick)
 		bool bMoveDown = true;
 		static float fMoveXVel = 0.1f;
 		//static float fAlienHeight = 20;
+		// srand(time(NULL));
 
 		int iAlienNumber = rand() % m_vecAliens.size();
 
+		while (m_vecAliens[iAlienNumber]->IsHit())
+		{
+			iAlienNumber++;
+			if (iAlienNumber >= m_vecAliens.size())
+			{
+				iAlienNumber = 0;
+			}
+		}
 		CAlien* pAlien = m_vecAliens[iAlienNumber];
 
 		float fAlienHighestY = pAlien->GetY();
@@ -263,7 +258,7 @@ CLevel::ProcessAlienFire(float _fDeltaTick)
 		{
 			CAlien* pTempAlien = m_vecAliens[i];
 
-			if (pTempAlien->GetX() == fAlienX)
+			if (pTempAlien->GetX() == fAlienX && pTempAlien->GetY() > fAlienHighestY && !pTempAlien->IsHit())
 			{
 				if (pTempAlien->GetY() > fAlienHighestY)
 				{
@@ -288,10 +283,10 @@ CLevel::ProcessAlienFire(float _fDeltaTick)
 void
 CLevel::ProcessBulletPlayerCollision()
 {
-    float fBulletR = m_pBullet->GetRadius();
+    float fBulletR = m_pAlienBullet->GetRadius();
 
-    float fBulletX = m_pBullet->GetX();
-    float fBulletY = m_pBullet->GetY(); 
+    float fBulletX = m_pAlienBullet->GetX();
+    float fBulletY = m_pAlienBullet->GetY();
 
     float fPlayerX = m_pPlayer->GetX();
     float fPlayerY = m_pPlayer->GetY();
@@ -304,9 +299,40 @@ CLevel::ProcessBulletPlayerCollision()
         (fBulletY + fBulletR > fPlayerY - fPlayerH / 2) && //bullet.bottom > player.top
         (fBulletY - fBulletR < fPlayerY + fPlayerH / 2))  //bullet.top < player.bottom
     {
-        m_pBullet->SetY((fPlayerY - fPlayerH / 2) - fBulletR);  //Set the bullet.bottom = player.top; to prevent the bullet from going through the player!
-        m_pBullet->SetVelocityY(m_pBullet->GetVelocityY() * -1); //Reverse bullet's Y direction
+		m_iLives -= 1;
+		m_iScore -= 15;
+		m_pAlienBullet->SetY(m_iHeight + 10);  
     }
+}
+
+void
+CLevel::ProcessBulletMysteryShipCollision()
+{
+	if (!m_pBullet->GetCanHit() or !m_pMysteryShip->IsHit())
+	{
+		return;
+	}
+	float fBulletR = m_pBullet->GetRadius();
+
+	float fBulletX = m_pBullet->GetX();
+	float fBulletY = m_pBullet->GetY();
+
+	float fMysteryShipX = m_pMysteryShip->GetX();
+	float fMysteryShipY = m_pMysteryShip->GetY();
+
+	float fMysteryShipH = m_pMysteryShip->GetHeight();
+	float fMysteryShipW = m_pMysteryShip->GetWidth();
+
+	if ((fBulletX + fBulletR > fMysteryShipX - fMysteryShipW / 2) && 
+		(fBulletX - fBulletR < fMysteryShipX + fMysteryShipW / 2) && 
+		(fBulletY + fBulletR > fMysteryShipY - fMysteryShipH / 2) && 
+		(fBulletY - fBulletR < fMysteryShipY + fMysteryShipH / 2))
+	{
+		m_iScore += 50;
+		m_pMysteryShip->SetHit(true);
+	}
+
+	CLevel::UpdateScoreText();
 }
 
 void
@@ -339,21 +365,25 @@ CLevel::ProcessBulletAlienCollision()
 
 				m_pBullet->SetCanHit(false);
 
+				m_iScore += 10;
+
                 SetAliensRemaining(GetAliensRemaining() - 1);
             }
         }
     }
 }
 
-void CLevel::ProcessMoveAliens(float _fDeltaTick)
+void 
+CLevel::ProcessMoveAliens(float _fDeltaTick)
 {
 	//Brick Movement Code
 	bool bMoveDown = true;
 	static float fMoveXVel = 0.1f;
 	//static float fAlienHeight = 20;
+
 	for (unsigned int i = 0; i < m_vecAliens.size(); ++i)
 	{
-		m_vecAliens[i]->SetX(m_vecAliens[i]->GetX() + fMoveXVel);
+		m_vecAliens[i]->SetX((m_vecAliens[i]->GetX() + fMoveXVel));
 		//Move right
 		if ((m_vecAliens[i]->GetX() + m_vecAliens[i]->GetWidth() <= 60) && !(m_vecAliens[i]->IsHit()))
 		{
@@ -389,6 +419,19 @@ CLevel::ProcessCheckForWin()
     }
 
     CGame::GetInstance().GameOverWon();
+}
+
+void
+CLevel::ProcessCheckForLose()
+{
+	if (m_iLives > 0)
+	{
+		return;
+	}
+
+
+
+	CGame::GetInstance().GameOverLost();
 }
 
 
@@ -446,9 +489,9 @@ CLevel::DrawScore()
 void 
 CLevel::UpdateScoreText()
 {
-    m_strScore = "Aliens Remaining: ";
+    m_strScore = "Score: ";
 
-    m_strScore += ToString(GetAliensRemaining());
+    m_strScore += ToString(m_iScore);
 }
 
 
@@ -460,3 +503,20 @@ CLevel::DrawFPS()
 	m_fpsCounter->DrawFPSText(hdc, m_iWidth, m_iHeight);
 
 }
+
+
+void
+CLevel::DrawHealth()
+{
+	HDC hdc = CGame::GetInstance().GetBackBuffer()->GetBFDC();
+
+
+	m_strHealth = "Health: ";
+	m_strHealth += ToString(m_iLives);
+
+
+
+	TextOutA(hdc, 0, 0, m_strHealth.c_str(), static_cast<int>(m_strHealth.size()));
+
+}
+

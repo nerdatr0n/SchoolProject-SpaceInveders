@@ -34,6 +34,7 @@ class CAlien;
 class CFPSCounter;
 class CBackGround;
 class CAlienBullet;
+class CMysteryShip;
 
 class CLevel
 {
@@ -52,23 +53,24 @@ public:
     int GetAliensRemaining() const;
 
 protected:
-    void ProcessBulletWallCollision(float);
-	void ProcessPlayerWallCollison();
     void ProcessBulletPlayerCollision();
     void ProcessBulletAlienCollision();
 	void ProcessMoveAliens(float _fDeltaTick);
 	void ProcessAlienFire(float _fDeltaTick);
+	void ProcessBulletMysteryShipCollision();
 
 
 	void ProcessFire(float);
 
     void ProcessCheckForWin();
+	void ProcessCheckForLose();
 
     void ProcessBulletBounds();
 
     void UpdateScoreText();
     void DrawScore();
 	void DrawFPS();
+	void DrawHealth();
 
     void SetAliensRemaining(int _i);
 
@@ -84,6 +86,7 @@ protected:
     CBullet* m_pBullet;
 	CAlienBullet* m_pAlienBullet;
     CPlayer* m_pPlayer;
+	CMysteryShip* m_pMysteryShip;
 	
     std::vector<CAlien*> m_vecAliens;
 	CFPSCounter* m_fpsCounter;
@@ -91,8 +94,15 @@ protected:
     int m_iWidth;
     int m_iHeight;
 
-    int m_iAliensRemaining;
+	int m_iLives;
+	int m_iScore;
+	
 
+
+	std::string m_strHealth;
+
+    int m_iAliensRemaining;
+	 
     std::string m_strScore;
 
 private:

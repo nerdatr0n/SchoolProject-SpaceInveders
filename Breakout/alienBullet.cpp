@@ -51,7 +51,7 @@ CAlienBullet::Initialise(float _fPosX, float _fPosY, float _fVelocityX, float _f
 	m_fVelocityY = _fVelocityY;
 
 	return (true);
-}
+} 
 
 void
 CAlienBullet::Draw()
